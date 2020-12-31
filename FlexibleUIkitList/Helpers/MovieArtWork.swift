@@ -31,9 +31,10 @@ struct MovieArtWork: View {
             .transition(.fade(duration: 0.5)) // Fade Transition with duration
           //  .scaledToFit()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onTapGesture {
-            //    self.selected()
-            }
+        
+//            .onTapGesture {
+//            //    self.selected()
+//            }
     }
 }
 

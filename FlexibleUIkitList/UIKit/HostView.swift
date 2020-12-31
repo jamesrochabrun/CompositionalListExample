@@ -8,6 +8,8 @@
 import UIKit
 import SwiftUI
 
+/// UIView abstraction that hosts a SwfitUI `View`
+
 final class HostView<V: View>: UIView {
     
     private weak var controller: UIHostingController<V>?

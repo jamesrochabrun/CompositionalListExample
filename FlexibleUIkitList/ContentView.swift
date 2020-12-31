@@ -12,34 +12,37 @@ struct ContentView: View {
     @ObservedObject var viewModel = MoviesProvider()
 
     var body: some View {
-        
-//        List {
-//            ForEach(viewModel.movies) {
-//                MovieArtWork(movie: $0)
-//            }
-//        }.onAppear {
-//            viewModel.load()
-//        }
-//
-// Go from here ->
-        // 1 - wjy datasource is not called?
-        // 2 -- maybe change this for a view builder?
-        Group {
-           // print("this is happening with \(viewModel.movies.count)")
+        NavigationView {
             if viewModel.movies.count  == 0 {
                 ActivityIndicator()
             } else {
-                FlexibleList(itemsPerSection: [viewModel.movies.splitted().0, viewModel.movies.splitted().1],
-                             layout: UICollectionViewCompositionalLayout.homeLayout(),
-                             parent: nil) { model, indexPath in
-                    Group {
+                // Splitting the array just to give the datasource 2 sections.
+                /**
+                 Usage of `CompositionalList`
+                 - `itemsPerSection` - Provide a list of objects that conform to `Hashable` (`IdentifiableHashable` is also available on this repo, it is a protocol composition that helps with SwiftUI views by providing an identifier.
+                 - `layout` -  Pass any kind of `UICollectionViewLayout`, ideally a compositilnal layout object.
+                 - `CellProvider` - Closure of type `(Model, IndexPath) -> (View)`
+                 */
+                
+                let section0 = viewModel.movies.splitted.0 // <- splitting the array just to display 2 sections in the UI
+                let section1 = viewModel.movies.splitted.1
+
+                CompositionalList(itemsPerSection: [section0, section1],
+                                  layout: UICollectionViewCompositionalLayout.homeLayout()) { model, indexPath in
+                    Group { // <- TODO avoid this maybe by using a `ViewBuilder` in the initializer
                         if indexPath.section == 0 {
                             MoviePageView(movie: model)
-                        } else  {
-                            MovieArtWork(movie: model)
+                        } else {
+                            NavigationLink(
+                                destination:
+                                    MovieDetail(movie: model),
+                                label: {
+                                    MovieArtWork(movie: model)
+                                })
                         }
                     }
                 }
+                .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
             }
         }
@@ -49,6 +52,30 @@ struct ContentView: View {
     }
 }
 
+// MARK: - UI
+struct MovieDetail: View {
+    
+    @ObservedObject var movie: MovieViewModel
+
+    var body: some View {
+        ZStack {
+            MovieArtWork(movie: movie)
+                .overlay(Color.black.opacity(0.5))
+            VStack(spacing: 15) {
+                Text(movie.title)
+                    .bold()
+                    .foregroundColor(Color.white)
+                    .font(.title)
+                    .multilineTextAlignment(.center)
+                Text(movie.overview)
+                    .foregroundColor(Color.white)
+                    .font(.body)
+            }
+            .padding(.horizontal, 50)
+        }
+        .edgesIgnoringSafeArea(.all)
+    }
+}
 
 struct MoviePageView: View {
     
@@ -57,22 +84,14 @@ struct MoviePageView: View {
     var body: some View {
         ZStack {
             MovieArtWork(movie: movie)
+                .blur(radius: 5)
             VStack {
                 Text(movie.title)
                     .bold()
                     .foregroundColor(Color.white)
-                    .font(.title)
+                    .font(Font.custom("Montserrat-Bold", size: 35.0))
             }
         }
-    }
-}
-
-extension Array {
-    func splitted() -> ([Element], [Element]) {
-        let half = count / 2 + count % 2
-        let head = self[0..<half]
-        let tail = self[half..<count]
-        return (Array(head), Array(tail))
     }
 }
 
@@ -90,9 +109,17 @@ struct ActivityIndicator: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIActivityIndicatorView, context: Context) {
-        
     }
-    
-    
-    
 }
+
+
+// MARK:- Helper
+extension Array {
+    var splitted: ([Element], [Element]) {
+        let half = count / 2 + count % 2
+        let head = self[0..<half]
+        let tail = self[half..<count]
+        return (Array(head), Array(tail))
+    }
+}
+

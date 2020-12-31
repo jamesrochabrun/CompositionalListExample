@@ -1,5 +1,5 @@
 //
-//  FlexibleList.swift
+//  CompositionalList.swift
 //  FlexibleList
 //
 //  Created by James Rochabrun on 12/30/20.
@@ -7,13 +7,19 @@
 
 import SwiftUI
 
-struct FlexibleList<V: View, H: Hashable>: UIViewRepresentable {
+/// `UIViewRepresentable` object that takes a `View` and a `Model` to render items in a list, it takes a `UICollectionViewLayout` on the initializer that will manage the UI display.
+
+/**
+ - `Model` must conform to `Hashable` so it can be used inside a `DiffableDataSource`
+ - `V` must conform to `View`
+ */
+struct CompositionalList<V: View, Model: Hashable> {
         
-    typealias Diff = DiffCollectionView<V, H>
-    var itemsPerSection: [[H]]
-    var layout: UICollectionViewLayout
+    typealias Diff = DiffCollectionView<V, Model>
+    let itemsPerSection: [[Model]]
+    let layout: UICollectionViewLayout
     var parent: UIViewController?
-    var cellProvider: Diff.CellProvider
+    let cellProvider: Diff.CellProvider
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -21,13 +27,13 @@ struct FlexibleList<V: View, H: Hashable>: UIViewRepresentable {
     
     class Coordinator: NSObject {
         
-        var list: FlexibleList
-        var itemsPerSection: [[H]]
-        var layout: UICollectionViewLayout
-        var cellProvider: Diff.CellProvider
+        let list: CompositionalList
+        let itemsPerSection: [[Model]]
+        let layout: UICollectionViewLayout
+        let cellProvider: Diff.CellProvider
         var parent: UIViewController?
         
-        init(_ list: FlexibleList) {
+        init(_ list: CompositionalList) {
             
             self.list = list
             self.itemsPerSection = list.itemsPerSection
@@ -36,6 +42,9 @@ struct FlexibleList<V: View, H: Hashable>: UIViewRepresentable {
             self.parent = list.parent
         }
     }
+}
+
+extension CompositionalList: UIViewRepresentable {
     
     func updateUIView(_ uiView: Diff, context: Context) {
         uiView.applySnapshotWith(context.coordinator.itemsPerSection)

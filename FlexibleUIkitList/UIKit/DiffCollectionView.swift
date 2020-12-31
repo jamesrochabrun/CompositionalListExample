@@ -9,6 +9,8 @@ import UIKit
 import BaseUI
 import SwiftUI
 
+/// `UIKIt` collection view that uses diffable data source and compositinal layout.
+
 @available(iOS 13, *)
 final class DiffCollectionView<SwiftUIVIew: View,
                                Model: Hashable>: Base, UICollectionViewDelegate {
@@ -18,7 +20,7 @@ final class DiffCollectionView<SwiftUIVIew: View,
     }
 
     // MARK:- UI
-    private var collectionView: UICollectionView!
+    private (set)var collectionView: UICollectionView! // crash if not initialized. 🤷🏽‍♂️
 
     // MARK:- Type Aliases
     private typealias DiffDataSource = UICollectionViewDiffableDataSource<SectionIdentifier, Model>
@@ -40,22 +42,22 @@ final class DiffCollectionView<SwiftUIVIew: View,
                      parent: UIViewController?,
                      _ cellProvider: @escaping CellProvider) {
         self.init()
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView?.register(SectionCell<SwiftUIVIew>.self)
-        collectionView?.delegate = self
+        collectionView = .init(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.register(WrapperViewCell<SwiftUIVIew>.self)
+        collectionView.delegate = self
         addSubview(collectionView)
         collectionView.fillSuperview()
         collectionView.collectionViewLayout = layout
         configureDataSource(cellProvider)
         self.parent = parent
-        collectionView.dataSource = dataSource
     }
     
     // MARK:- 1: DataSource Configuration
     private func configureDataSource(_ cellProvider: @escaping CellProvider) {
             
         dataSource = DiffDataSource(collectionView: collectionView) { collectionView, indexPath, model in
-            let cell: SectionCell<SwiftUIVIew> = collectionView.dequeueReusableCell(forIndexPath: indexPath)
+            let cell: WrapperViewCell<SwiftUIVIew> = collectionView.dequeueReusableCell(forIndexPath: indexPath)
             cell.setupWith(cellProvider(model, indexPath), parent: self.parent)
             return cell
         }
@@ -64,10 +66,11 @@ final class DiffCollectionView<SwiftUIVIew: View,
     // MARK:- 2: ViewModels injection and snapshot
     public func applySnapshotWith(_ itemsPerSection: [[Model]]) {
         currentSnapshot = Snapshot()
+        guard var currentSnapshot = currentSnapshot else { return }
         let sections = itemsPerSection.map { SectionIdentifier(viewModels: $0) }
-        currentSnapshot?.appendSections(sections)
-        sections.forEach { currentSnapshot?.appendItems($0.viewModels, toSection: $0) }
-        dataSource?.apply(currentSnapshot!)
+        currentSnapshot.appendSections(sections)
+        sections.forEach { currentSnapshot.appendItems($0.viewModels, toSection: $0) }
+        dataSource?.apply(currentSnapshot)
     }
     
     // MARK:- UICollectionViewDelegate
