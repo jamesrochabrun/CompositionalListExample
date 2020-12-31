@@ -29,17 +29,50 @@ struct ContentView: View {
             if viewModel.movies.count  == 0 {
                 ActivityIndicator()
             } else {
-                FlexibleList(itemsPerSection: [viewModel.movies],
+                FlexibleList(itemsPerSection: [viewModel.movies.splitted().0, viewModel.movies.splitted().1],
                              layout: UICollectionViewCompositionalLayout.homeLayout(),
-                             parent: nil) {
-                    MovieArtWork(movie: $0)
+                             parent: nil) { model, indexPath in
+                    Group {
+                        if indexPath.section == 0 {
+                            MoviePageView(movie: model)
+                        } else  {
+                            MovieArtWork(movie: model)
+                        }
+                    }
                 }
-                .border(Color.blue, width: 5)
+                .edgesIgnoringSafeArea(.vertical)
             }
         }
         .onAppear {
             viewModel.load()
         }
+    }
+}
+
+
+struct MoviePageView: View {
+    
+    @ObservedObject var movie: MovieViewModel
+    
+    var body: some View {
+        ZStack {
+            MovieArtWork(movie: movie)
+            VStack {
+                Text(movie.title)
+                    .bold()
+                    .foregroundColor(Color.white)
+                    .font(.title)
+            }
+        }
+    }
+}
+
+extension Array {
+    func splitted() -> ([Element], [Element]) {
+        let half = count / 2 + count % 2
+        let head = self[0..<half]
+        let tail = self[half..<count]
+        return (Array(head), Array(tail))
     }
 }
 

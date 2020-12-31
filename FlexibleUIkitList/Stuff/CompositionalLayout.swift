@@ -43,7 +43,7 @@ extension UICollectionViewCompositionalLayout {
         
         let layout = UICollectionViewCompositionalLayout {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-
+            
             let insets = NSDirectionalEdgeInsets.all(1.0)
             let groupsFraction: CGFloat = 5.0 // needs to be equal of numbers of final grouped items
             /// PART 1
@@ -82,9 +82,33 @@ extension UICollectionViewCompositionalLayout {
             if sectionIndex == 0 {
               //  section.boundarySupplementaryItems = [sectionHeader]
             }
-            return section
+            return sectionIndex == 0 ? Self.createSingleListSection() : section
         }
         return layout
+    }
+    
+    static private func createSingleListSection() -> NSCollectionLayoutSection {
+        // 2
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
+                                              heightDimension: .fractionalHeight(1))
+        // 3
+        let layoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        layoutItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+            
+        // 4
+        let layoutGroupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
+                                                     heightDimension: .estimated(250))
+        // 5
+        let layoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: layoutGroupSize,
+                                                             subitems: [layoutItem])
+            
+        // 6
+        let layoutSection = NSCollectionLayoutSection(group: layoutGroup)
+        
+        // 7
+        layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
+            
+        return layoutSection
     }
     
     // MARK:- Search Master Layout

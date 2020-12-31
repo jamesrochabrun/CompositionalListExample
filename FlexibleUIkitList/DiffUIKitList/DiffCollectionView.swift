@@ -27,7 +27,7 @@ final class DiffCollectionView<SwiftUIVIew: View,
     typealias SelectedContentAtIndexPath = ((Model, IndexPath) -> Void)
     var selectedContentAtIndexPath: SelectedContentAtIndexPath?
     
-    typealias CellProvider = (Model) -> SwiftUIVIew
+    typealias CellProvider = (Model, IndexPath) -> SwiftUIVIew
     
     // MARK:- Diffable Data Source
     private var dataSource: DiffDataSource?
@@ -55,10 +55,8 @@ final class DiffCollectionView<SwiftUIVIew: View,
     private func configureDataSource(_ cellProvider: @escaping CellProvider) {
             
         dataSource = DiffDataSource(collectionView: collectionView) { collectionView, indexPath, model in
-            
-            /// WHY!!!! THIS IN NOT GETTING CALLED
             let cell: SectionCell<SwiftUIVIew> = collectionView.dequeueReusableCell(forIndexPath: indexPath)
-            cell.setupWith(cellProvider(model), parent: self.parent)
+            cell.setupWith(cellProvider(model, indexPath), parent: self.parent)
             return cell
         }
     }
