@@ -80,6 +80,16 @@ final class DiffCollectionView<SwiftUIVIew: View,
     }
 }
 
+extension NSDiffableDataSourceSnapshot {
+    
+    mutating func deleteItems(_ items: [ItemIdentifierType], at section: Int) {
+  
+        deleteItems(items)
+        let sectionIdentifier = sectionIdentifiers[section]
+        guard numberOfItems(inSection: sectionIdentifier) == 0 else { return }
+        deleteSections([sectionIdentifier])
+    }
+}
 
 class Base: UIView {
     

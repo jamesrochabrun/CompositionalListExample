@@ -16,10 +16,17 @@ import SwiftUI
 struct CompositionalList<V: View, Model: Hashable> {
         
     typealias Diff = DiffCollectionView<V, Model>
+    
     let itemsPerSection: [[Model]]
-    let layout: UICollectionViewLayout
+    private (set)var layout: UICollectionViewLayout = UICollectionViewLayout()
     var parent: UIViewController?
     let cellProvider: Diff.CellProvider
+    
+    init(_ itemsPerSection: [[Model]], parent: UIViewController? = nil, cellProvider: @escaping Diff.CellProvider) {
+        self.itemsPerSection = itemsPerSection
+        self.parent = parent
+        self.cellProvider = cellProvider
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -54,5 +61,14 @@ extension CompositionalList: UIViewRepresentable {
         Diff(layout: context.coordinator.layout,
              parent: context.coordinator.parent,
              context.coordinator.cellProvider)
+    }
+}
+
+extension CompositionalList {
+    
+    func layout(_ layout: () -> UICollectionViewLayout) -> Self {
+        var `self` = self
+        `self`.layout = layout()
+        return `self`
     }
 }

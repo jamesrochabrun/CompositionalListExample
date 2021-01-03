@@ -26,21 +26,21 @@ struct ContentView: View {
                 
                 let section0 = viewModel.movies.splitted.0 // <- splitting the array just to display 2 sections in the UI
                 let section1 = viewModel.movies.splitted.1
-
-                CompositionalList(itemsPerSection: [section0, section1],
-                                  layout: UICollectionViewCompositionalLayout.homeLayout()) { model, indexPath in
-                    Group { // <- TODO avoid this maybe by using a `ViewBuilder` in the initializer
-                        if indexPath.section == 0 {
-                            MoviePageView(movie: model)
-                        } else {
+                                
+                CompositionalList([section0, section1]) { model, indexPath in
+                    Group {
+                        switch indexPath.section {
+                        case 0: MoviePageView(movie: model)
+                        default:
                             NavigationLink(
-                                destination:
-                                    MovieDetail(movie: model),
-                                label: {
+                                destination: MovieDetail(movie: model), label: {
                                     MovieArtWork(movie: model)
                                 })
                         }
                     }
+                }
+                .layout {
+                    UICollectionViewCompositionalLayout.homeLayout()
                 }
                 .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
