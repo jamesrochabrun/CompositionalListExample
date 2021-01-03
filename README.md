@@ -9,24 +9,23 @@ CompositionalList is a SwiftUI Wrapper around a UIKit Collection view that inter
 Usage of `CompositionalList`
 
 - `itemsPerSection` - Provide bidimensional list of objects that conform to `Hashable` (`IdentifiableHashable` is also available on this repo, it is a protocol composition that helps with SwiftUI views by providing an identifier.)
-- `layout` -  Pass any kind of `UICollectionViewLayout`, ideally a compositilnal layout object.
 - `CellProvider` - closure of type `(Model, IndexPath) -> (View)`
 
 ```
-     CompositionalList(itemsPerSection: observedObject.value,
-                                  layout: UICollectionViewCompositionalLayout.homeLayout()) { model, indexPath in
-                    Group { 
-                        if indexPath.section == 0 {
-                            MoviePageView(movie: model)
-                        } else {
+                CompositionalList([section0, section1]) { model, indexPath in
+                    Group {
+                        switch indexPath.section {
+                        case 0: MoviePageView(movie: model)
+                        default:
                             NavigationLink(
-                                destination:
-                                    MovieDetail(movie: model),
-                                label: {
+                                destination: MovieDetail(movie: model), label: {
                                     MovieArtWork(movie: model)
                                 })
                         }
                     }
+                }
+                .layout {
+                    UICollectionViewCompositionalLayout.homeLayout()
                 }
 ```
 
