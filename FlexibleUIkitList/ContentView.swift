@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     
@@ -26,11 +27,16 @@ struct ContentView: View {
                 
                 let section0 = viewModel.movies.splitted.0 // <- splitting the array just to display 2 sections in the UI
                 let section1 = viewModel.movies.splitted.1
-                                
+
+                
                 CompositionalList([section0, section1]) { model, indexPath in
+                    //
+                     //   MoviePageView(movie: model)
+
                     Group {
                         switch indexPath.section {
-                        case 0: MoviePageView(movie: model)
+                        case 0:
+                            MoviePageView(movie: model)
                         default:
                             NavigationLink(
                                 destination: MovieDetail(movie: model), label: {
@@ -42,6 +48,19 @@ struct ContentView: View {
                 .layout {
                     UICollectionViewCompositionalLayout.homeLayout()
                 }
+                .header { k, i in
+                    Group {
+                        if k == "" {
+                            return Text("some text indexPath \(i.section) kind \(k)")
+                        } else {
+                            return Text("some text indexPath \(i.section) kind \(k)")
+                        }
+                    }
+                }
+                /// add the sectiom stuff here same a sthe layout
+                // .
+     
+
                 .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
             }

@@ -11,11 +11,14 @@ import SwiftUI
 
 /// `UIKIt` collection view that uses diffable data source and compositinal layout.
 
+/// TODO: create a certain kind of enumeration for the SectionIdentifier.  so we can pass the identifier
+
 @available(iOS 13, *)
-final class DiffCollectionView<SwiftUIVIew: View,
+final class DiffCollectionView<HeaderView: View,
+                               SwiftUIVIew: View,
                                Model: Hashable>: Base, UICollectionViewDelegate {
     
-    private struct SectionIdentifier: Hashable {
+    struct SectionIdentifier: Hashable {
         var viewModels: [Model]
     }
 
@@ -30,6 +33,8 @@ final class DiffCollectionView<SwiftUIVIew: View,
     var selectedContentAtIndexPath: SelectedContentAtIndexPath?
     
     typealias CellProvider = (Model, IndexPath) -> SwiftUIVIew
+    typealias HeaderProvider = (String, IndexPath) -> HeaderView?
+
     
     // MARK:- Diffable Data Source
     private var dataSource: DiffDataSource?
@@ -40,16 +45,22 @@ final class DiffCollectionView<SwiftUIVIew: View,
     // MARK:- Life Cycle
     convenience init(layout: UICollectionViewLayout,
                      parent: UIViewController?,
-                     _ cellProvider: @escaping CellProvider) {
+                     _ cellProvider: @escaping CellProvider,
+                     _ headerProvider: HeaderProvider?) {
         self.init()
         collectionView = .init(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.register(WrapperViewCell<SwiftUIVIew>.self)
+        collectionView.registerHeader(WrapperCollectionReusableView<HeaderView>.self, kind: UICollectionView.elementKindSectionHeader)
+        collectionView.registerHeader(WrapperCollectionReusableView<HeaderView>.self, kind: UICollectionView.elementKindSectionFooter)
         collectionView.delegate = self
         addSubview(collectionView)
         collectionView.fillSuperview()
         collectionView.collectionViewLayout = layout
         configureDataSource(cellProvider)
+        if let headerProvider = headerProvider {
+            header(headerProvider)
+        }
         self.parent = parent
     }
     
@@ -88,6 +99,27 @@ extension NSDiffableDataSourceSnapshot {
         let sectionIdentifier = sectionIdentifiers[section]
         guard numberOfItems(inSection: sectionIdentifier) == 0 else { return }
         deleteSections([sectionIdentifier])
+    }
+}
+
+extension DiffCollectionView {
+    
+    func header(_ headerProvider: @escaping HeaderProvider) {
+        
+        dataSource?.supplementaryViewProvider = {(collectionView: UICollectionView, kind: String,
+            indexPath: IndexPath) -> UICollectionReusableView? in
+            let header: WrapperCollectionReusableView<HeaderView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
+//
+//            if self.currentSnapshot?.sectionIdentifiers.isEmpty ?? true {
+//                return header
+//            }
+       //     if let model = self.currentSnapshot?.sectionIdentifiers[indexPath.section] {
+                if let h = headerProvider(kind, indexPath) {
+                    header.setupWith(h, parent: self.parent)
+                }
+         //   }
+            return header
+        }
     }
 }
 

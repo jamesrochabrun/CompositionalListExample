@@ -74,15 +74,20 @@ extension UICollectionViewCompositionalLayout {
             
             let headerFooterSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                           heightDimension: .estimated(headerSize))
+            
             let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: headerFooterSize,
                 elementKind:  UICollectionView.elementKindSectionHeader, alignment: .top)
+            let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerFooterSize,
+                elementKind:  UICollectionView.elementKindSectionFooter, alignment: .bottom)
             
             /// we only want to add a header on the first section
-            if sectionIndex == 0 {
-              //  section.boundarySupplementaryItems = [sectionHeader]
-            }
-            return sectionIndex == 0 ? Self.createSingleListSection() : section
+           // if sectionIndex == 1 {
+                section.boundarySupplementaryItems = [sectionHeader, sectionFooter]
+           // }
+            //return sectionIndex == 0 ? Self.createSingleListSection() : section
+            return section
         }
         return layout
     }

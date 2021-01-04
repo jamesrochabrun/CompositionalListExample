@@ -25,6 +25,7 @@
 		7BBB17DF259D9B04006BCD58 /* HostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBB17B4259D9AB0006BCD58 /* HostView.swift */; };
 		7BBB17E5259D9B2B006BCD58 /* BaseUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7BBB17E4259D9B2B006BCD58 /* BaseUI */; };
 		7BBB17EB259D9B49006BCD58 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7BBB17EA259D9B49006BCD58 /* SDWebImageSwiftUI */; };
+		7BBB184025A19551006BCD58 /* WrapperCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBB183F25A19551006BCD58 /* WrapperCollectionReusableView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		7BBB17B4259D9AB0006BCD58 /* HostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostView.swift; sourceTree = "<group>"; };
 		7BBB17B6259D9AB0006BCD58 /* DiffCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffCollectionView.swift; sourceTree = "<group>"; };
 		7BBB17B7259D9AB0006BCD58 /* WrapperViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapperViewCell.swift; sourceTree = "<group>"; };
+		7BBB183F25A19551006BCD58 /* WrapperCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapperCollectionReusableView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,6 +186,7 @@
 				7BBB17B4259D9AB0006BCD58 /* HostView.swift */,
 				7BBB17B6259D9AB0006BCD58 /* DiffCollectionView.swift */,
 				7BBB17B7259D9AB0006BCD58 /* WrapperViewCell.swift */,
+				7BBB183F25A19551006BCD58 /* WrapperCollectionReusableView.swift */,
 			);
 			path = UIKit;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 				7BBB177F259D9AA0006BCD58 /* ContentView.swift in Sources */,
 				7BBB17BF259D9AEE006BCD58 /* WrapperViewCell.swift in Sources */,
 				7BBB17CB259D9AF6006BCD58 /* MovieArtWork.swift in Sources */,
+				7BBB184025A19551006BCD58 /* WrapperCollectionReusableView.swift in Sources */,
 				7BBB17C3259D9AF1006BCD58 /* MovieClient.swift in Sources */,
 				7BBB177D259D9AA0006BCD58 /* FlexibleUIkitListApp.swift in Sources */,
 				7BBB17D7259D9AFD006BCD58 /* CompositionalLayout.swift in Sources */,
