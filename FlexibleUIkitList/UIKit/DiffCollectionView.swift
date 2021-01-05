@@ -33,7 +33,7 @@ final class DiffCollectionView<HeaderView: View,
     var selectedContentAtIndexPath: SelectedContentAtIndexPath?
     
     typealias CellProvider = (Model, IndexPath) -> SwiftUIVIew
-    typealias HeaderProvider = (String, IndexPath) -> HeaderView?
+    typealias HeaderProvider = (SectionIdentifier, String, IndexPath) -> HeaderView
 
     
     // MARK:- Diffable Data Source
@@ -107,17 +107,11 @@ extension DiffCollectionView {
     func header(_ headerProvider: @escaping HeaderProvider) {
         
         dataSource?.supplementaryViewProvider = {(collectionView: UICollectionView, kind: String,
-            indexPath: IndexPath) -> UICollectionReusableView? in
+                                                  indexPath: IndexPath) -> UICollectionReusableView? in
             let header: WrapperCollectionReusableView<HeaderView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
-//
-//            if self.currentSnapshot?.sectionIdentifiers.isEmpty ?? true {
-//                return header
-//            }
-       //     if let model = self.currentSnapshot?.sectionIdentifiers[indexPath.section] {
-                if let h = headerProvider(kind, indexPath) {
-                    header.setupWith(h, parent: self.parent)
-                }
-         //   }
+            if let sectionIdentifier = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section] {
+                header.setupWith(headerProvider(sectionIdentifier, kind, indexPath), parent: self.parent)
+            }
             return header
         }
     }

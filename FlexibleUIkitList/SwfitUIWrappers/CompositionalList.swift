@@ -13,6 +13,10 @@ import SwiftUI
  - `Model` must conform to `Hashable` so it can be used inside a `DiffableDataSource`
  - `V` must conform to `View`
  */
+
+
+// TODO:  fix this bug and assign an enum as sections!
+
 struct CompositionalList<H: View, V: View, Model: Hashable> {
         
     typealias Diff = DiffCollectionView<H, V, Model>
@@ -26,11 +30,13 @@ struct CompositionalList<H: View, V: View, Model: Hashable> {
     
     init(_ itemsPerSection: [[Model]],
          parent: UIViewController? = nil,
-         cellProvider: @escaping Diff.CellProvider) {
+         cellProvider: @escaping Diff.CellProvider,
+         headerProvider: @escaping  Diff.HeaderProvider) {
         
         self.itemsPerSection = itemsPerSection
         self.parent = parent
         self.cellProvider = cellProvider
+        self.headerProvider = headerProvider
     }
 
     func makeCoordinator() -> Coordinator {
@@ -66,6 +72,8 @@ extension CompositionalList: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> Diff {
+        
+        
         Diff(layout: context.coordinator.layout,
              parent: context.coordinator.parent,
              context.coordinator.cellProvider,
@@ -80,10 +88,10 @@ extension CompositionalList {
         `self`.layout = layout()
         return `self`
     }
-    
-    func header(_ header: @escaping Diff.HeaderProvider) -> Self {
-        var `self` = self
-        `self`.headerProvider = header
-        return `self`
-    }
+//
+//    func header(_ header: @escaping Diff.HeaderProvider) -> Self {
+//        var `self` = self
+//        `self`.headerProvider = header
+//        return `self`
+//    }
 }
