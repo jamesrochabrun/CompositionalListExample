@@ -91,7 +91,7 @@ extension UICollectionViewCompositionalLayout {
         return layout
     }
     
-    static private func createSingleListSection() -> NSCollectionLayoutSection {
+    static func createSingleListSection() -> NSCollectionLayoutSection {
         // 2
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
                                               heightDimension: .fractionalHeight(1))

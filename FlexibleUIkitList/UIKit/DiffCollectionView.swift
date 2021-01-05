@@ -11,29 +11,30 @@ import SwiftUI
 
 /// `UIKIt` collection view that uses diffable data source and compositinal layout.
 
-/// TODO: create a certain kind of enumeration for the SectionIdentifier.  so we can pass the identifier
+protocol SectionIdentifierViewModel {
+    associatedtype SectionIdentifier: Hashable
+    associatedtype CellIdentifier: Hashable
+    var sectionIdentifier: SectionIdentifier { get }
+    var cellIdentifiers: [CellIdentifier] { get }
+}
 
 @available(iOS 13, *)
-final class DiffCollectionView<HeaderFooterView: View,
+final class DiffCollectionView<ViewModel: SectionIdentifierViewModel,
                                RowView: View,
-                               RowViewModel: Hashable>: Base, UICollectionViewDelegate {
+                               HeaderFooterView: View>: Base, UICollectionViewDelegate {
     
-    struct SectionIdentifier: Hashable {
-        var viewModels: [RowViewModel]
-    }
-
     // MARK:- UI
     private (set)var collectionView: UICollectionView! // crash if not initialized. 🤷🏽‍♂️
 
     // MARK:- Type Aliases
-    private typealias DiffDataSource = UICollectionViewDiffableDataSource<SectionIdentifier, RowViewModel>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<SectionIdentifier, RowViewModel>
+    private typealias DiffDataSource = UICollectionViewDiffableDataSource<ViewModel.SectionIdentifier, ViewModel.CellIdentifier>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<ViewModel.SectionIdentifier, ViewModel.CellIdentifier>
     
-    typealias SelectedContentAtIndexPath = ((RowViewModel, IndexPath) -> Void)
+    typealias SelectedContentAtIndexPath = ((ViewModel.CellIdentifier, IndexPath) -> Void)
     var selectedContentAtIndexPath: SelectedContentAtIndexPath?
     
-    typealias CellProvider = (RowViewModel, IndexPath) -> RowView
-    typealias HeaderFooterProvider = (SectionIdentifier, String, IndexPath) -> HeaderFooterView
+    typealias CellProvider = (ViewModel.CellIdentifier, IndexPath) -> RowView
+    typealias HeaderFooterProvider = (ViewModel.SectionIdentifier, String, IndexPath) -> HeaderFooterView?
     
     // MARK:- Diffable Data Source
     private var dataSource: DiffDataSource?
@@ -75,12 +76,11 @@ final class DiffCollectionView<HeaderFooterView: View,
     }
     
     // MARK:- 2: ViewModels injection and snapshot
-    public func applySnapshotWith(_ itemsPerSection: [[RowViewModel]]) {
+    public func applySnapshotWith(_ itemsPerSection: [ViewModel]) {
         currentSnapshot = Snapshot()
         guard var currentSnapshot = currentSnapshot else { return }
-        let sections = itemsPerSection.map { SectionIdentifier(viewModels: $0) }
-        currentSnapshot.appendSections(sections)
-        sections.forEach { currentSnapshot.appendItems($0.viewModels, toSection: $0) }
+        currentSnapshot.appendSections(itemsPerSection.map { $0.sectionIdentifier })
+        itemsPerSection.forEach { currentSnapshot.appendItems($0.cellIdentifiers, toSection: $0.sectionIdentifier) }
         dataSource?.apply(currentSnapshot)
     }
     
@@ -109,7 +109,7 @@ extension DiffCollectionView {
         dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
             let header: WrapperCollectionReusableView<HeaderFooterView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
             if let sectionIdentifier = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section] {
-                header.setupWith(headerProvider(sectionIdentifier, kind, indexPath), parent: self.parent)
+                header.setupWith(headerProvider(sectionIdentifier, kind, indexPath)!, parent: self.parent)
             }
             return header
         }

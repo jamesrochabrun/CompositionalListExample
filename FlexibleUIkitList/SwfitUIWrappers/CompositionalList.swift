@@ -14,20 +14,20 @@ import SwiftUI
  - `V` must conform to `View`
  */
 
-struct CompositionalList<HeaderFooterView: View,
+struct CompositionalList<ViewModel: SectionIdentifierViewModel,
                          RowView: View,
-                         RowViewModel: Hashable> {
+                         HeaderFooterView: View> {
         
-    typealias Diff = DiffCollectionView<HeaderFooterView, RowView, RowViewModel>
+    typealias Diff = DiffCollectionView<ViewModel, RowView, HeaderFooterView>
     
-    let itemsPerSection: [[RowViewModel]]
+    let itemsPerSection: [ViewModel]
     var parent: UIViewController?
     let cellProvider: Diff.CellProvider
     
     private (set)var layout: UICollectionViewLayout = UICollectionViewLayout()
     private (set)var headerProvider: Diff.HeaderFooterProvider? = nil
     
-    init(_ itemsPerSection: [[RowViewModel]],
+    init(_ itemsPerSection: [ViewModel],
          parent: UIViewController? = nil,
          cellProvider: @escaping Diff.CellProvider) {
         
@@ -43,7 +43,7 @@ struct CompositionalList<HeaderFooterView: View,
     class Coordinator: NSObject {
         
         fileprivate let list: CompositionalList
-        fileprivate let itemsPerSection: [[RowViewModel]]
+        fileprivate let itemsPerSection: [ViewModel]
         fileprivate let cellProvider: Diff.CellProvider
         fileprivate var parent: UIViewController?
         
@@ -84,9 +84,10 @@ extension CompositionalList {
         return `self`
     }
 
-    func header(_ header: @escaping Diff.HeaderFooterProvider) -> Self {
+    func sectionHeader(_ header: @escaping Diff.HeaderFooterProvider) -> Self {
         var `self` = self
         `self`.headerProvider = header
         return `self`
     }
 }
+

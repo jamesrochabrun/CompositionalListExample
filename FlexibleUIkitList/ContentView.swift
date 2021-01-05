@@ -30,10 +30,10 @@ struct ContentView: View {
                 let section0 = viewModel.movies.splitted.0 // <- splitting the array just to display 2 sections in the UI
                 let section1 = viewModel.movies.splitted.1
                 
+                let sectOne = MovieSectionItem(sectionIdentifier: .main, cellIdentifiers: section0)
+                let sectTwo = MovieSectionItem(sectionIdentifier: .more, cellIdentifiers: section1)
                 
-                
-                
-                CompositionalList([section0, section1]) { model, indexPath in
+                CompositionalList([sectOne, sectTwo]) { model, indexPath in
                     Group {
                         switch indexPath.section {
                         case 0:
@@ -49,8 +49,18 @@ struct ContentView: View {
                 .layout {
                     UICollectionViewCompositionalLayout.homeLayout()
                 }
-                .header { sectionIdentifier, kind, indexPath  in
-                    Text(self.titleSections[indexPath.section])
+                .sectionHeader { sectionIdentifier, kind, indexPath  in
+                    VStack {
+                        Text("sectionIdentifier.models")
+                        ScrollView (.horizontal, showsIndicators: false) {
+                             HStack {
+                                 //contents
+                                ForEach(sectionIdentifier.models, id: \.self) { title in
+                                    Text(title)
+                                }
+                             }
+                        }.frame(height: 100)
+                    }
                 }
                 .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
@@ -61,6 +71,24 @@ struct ContentView: View {
         }
     }
 }
+
+struct MovieSectionItem: SectionIdentifierViewModel {
+    var sectionIdentifier: Section
+    var cellIdentifiers: [MovieViewModel]
+}
+
+enum Section: String {
+    case main
+    case more
+    
+    var models: [String] {
+        switch self {
+        case .main: return ["mar", "ara"]
+        case .more: return ["zizou", "isa", "sasha"]
+        }
+    }
+}
+
 
 // MARK: - UI
 struct MovieDetail: View {
