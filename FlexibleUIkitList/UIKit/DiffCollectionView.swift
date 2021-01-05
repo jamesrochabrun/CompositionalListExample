@@ -14,27 +14,26 @@ import SwiftUI
 /// TODO: create a certain kind of enumeration for the SectionIdentifier.  so we can pass the identifier
 
 @available(iOS 13, *)
-final class DiffCollectionView<HeaderView: View,
-                               SwiftUIVIew: View,
-                               Model: Hashable>: Base, UICollectionViewDelegate {
+final class DiffCollectionView<HeaderFooterView: View,
+                               RowView: View,
+                               RowViewModel: Hashable>: Base, UICollectionViewDelegate {
     
     struct SectionIdentifier: Hashable {
-        var viewModels: [Model]
+        var viewModels: [RowViewModel]
     }
 
     // MARK:- UI
     private (set)var collectionView: UICollectionView! // crash if not initialized. 🤷🏽‍♂️
 
     // MARK:- Type Aliases
-    private typealias DiffDataSource = UICollectionViewDiffableDataSource<SectionIdentifier, Model>
-    private typealias Snapshot = NSDiffableDataSourceSnapshot<SectionIdentifier, Model>
+    private typealias DiffDataSource = UICollectionViewDiffableDataSource<SectionIdentifier, RowViewModel>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<SectionIdentifier, RowViewModel>
     
-    typealias SelectedContentAtIndexPath = ((Model, IndexPath) -> Void)
+    typealias SelectedContentAtIndexPath = ((RowViewModel, IndexPath) -> Void)
     var selectedContentAtIndexPath: SelectedContentAtIndexPath?
     
-    typealias CellProvider = (Model, IndexPath) -> SwiftUIVIew
-    typealias HeaderProvider = (SectionIdentifier, String, IndexPath) -> HeaderView
-
+    typealias CellProvider = (RowViewModel, IndexPath) -> RowView
+    typealias HeaderFooterProvider = (SectionIdentifier, String, IndexPath) -> HeaderFooterView
     
     // MARK:- Diffable Data Source
     private var dataSource: DiffDataSource?
@@ -46,13 +45,13 @@ final class DiffCollectionView<HeaderView: View,
     convenience init(layout: UICollectionViewLayout,
                      parent: UIViewController?,
                      _ cellProvider: @escaping CellProvider,
-                     _ headerProvider: HeaderProvider?) {
+                     _ headerProvider: HeaderFooterProvider?) {
         self.init()
         collectionView = .init(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
-        collectionView.register(WrapperViewCell<SwiftUIVIew>.self)
-        collectionView.registerHeader(WrapperCollectionReusableView<HeaderView>.self, kind: UICollectionView.elementKindSectionHeader)
-        collectionView.registerHeader(WrapperCollectionReusableView<HeaderView>.self, kind: UICollectionView.elementKindSectionFooter)
+        collectionView.register(WrapperViewCell<RowView>.self)
+        collectionView.registerHeader(WrapperCollectionReusableView<HeaderFooterView>.self, kind: UICollectionView.elementKindSectionHeader)
+        collectionView.registerHeader(WrapperCollectionReusableView<HeaderFooterView>.self, kind: UICollectionView.elementKindSectionFooter)
         collectionView.delegate = self
         addSubview(collectionView)
         collectionView.fillSuperview()
@@ -68,14 +67,15 @@ final class DiffCollectionView<HeaderView: View,
     private func configureDataSource(_ cellProvider: @escaping CellProvider) {
             
         dataSource = DiffDataSource(collectionView: collectionView) { collectionView, indexPath, model in
-            let cell: WrapperViewCell<SwiftUIVIew> = collectionView.dequeueReusableCell(forIndexPath: indexPath)
-            cell.setupWith(cellProvider(model, indexPath), parent: self.parent)
+            let cell: WrapperViewCell<RowView> = collectionView.dequeueReusableCell(forIndexPath: indexPath)
+            let cellView = cellProvider(model, indexPath)
+            cell.setupWith(cellView, parent: self.parent)
             return cell
         }
     }
     
     // MARK:- 2: ViewModels injection and snapshot
-    public func applySnapshotWith(_ itemsPerSection: [[Model]]) {
+    public func applySnapshotWith(_ itemsPerSection: [[RowViewModel]]) {
         currentSnapshot = Snapshot()
         guard var currentSnapshot = currentSnapshot else { return }
         let sections = itemsPerSection.map { SectionIdentifier(viewModels: $0) }
@@ -104,11 +104,10 @@ extension NSDiffableDataSourceSnapshot {
 
 extension DiffCollectionView {
     
-    func header(_ headerProvider: @escaping HeaderProvider) {
+    func header(_ headerProvider: @escaping HeaderFooterProvider) {
         
-        dataSource?.supplementaryViewProvider = {(collectionView: UICollectionView, kind: String,
-                                                  indexPath: IndexPath) -> UICollectionReusableView? in
-            let header: WrapperCollectionReusableView<HeaderView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
+        dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
+            let header: WrapperCollectionReusableView<HeaderFooterView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
             if let sectionIdentifier = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section] {
                 header.setupWith(headerProvider(sectionIdentifier, kind, indexPath), parent: self.parent)
             }

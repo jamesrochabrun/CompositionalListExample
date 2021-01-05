@@ -30,13 +30,14 @@ struct ContentView: View {
                 let section0 = viewModel.movies.splitted.0 // <- splitting the array just to display 2 sections in the UI
                 let section1 = viewModel.movies.splitted.1
                 
+                
+                
+                
                 CompositionalList([section0, section1]) { model, indexPath in
                     Group {
                         switch indexPath.section {
                         case 0:
                             MoviePageView(movie: model)
-                        case 1:
-                            Text("some")
                         default:
                             NavigationLink(
                                 destination: MovieDetail(movie: model), label: {
@@ -44,48 +45,13 @@ struct ContentView: View {
                                 })
                         }
                     }
-                } headerProvider: { sectionIdentifier, kind, indexPath in
-                    
-                    Text("some value \(titleSections[indexPath.section])")
                 }
                 .layout {
                     UICollectionViewCompositionalLayout.homeLayout()
                 }
-
-                
-//                CompositionalList([section0, section1]) { model, indexPath in
-//                    //
-//                     //   MoviePageView(movie: model)
-//
-//                    Group {
-//                        switch indexPath.section {
-//                        case 0:
-//                            MoviePageView(movie: model)
-//                        default:
-//                            NavigationLink(
-//                                destination: MovieDetail(movie: model), label: {
-//                                    MovieArtWork(movie: model)
-//                                })
-//                        }
-//                    }
-//                }
-//                .layout {
-//                    UICollectionViewCompositionalLayout.homeLayout()
-//                }
-              //  .header { k, i in
-             //       Text("some text indexPath \(i.section) kind \(k)")
-//                    Group {
-//                        if k == "" {
-//                            return Text("some text indexPath \(i.section) kind \(k)")
-//                        } else {
-//                            return Text("some text indexPath \(i.section) kind \(k)")
-//                        }
-//                    }
-               // }
-                /// add the sectiom stuff here same a sthe layout
-                // .
-     
-
+                .header { sectionIdentifier, kind, indexPath  in
+                    Text(self.titleSections[indexPath.section])
+                }
                 .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
             }

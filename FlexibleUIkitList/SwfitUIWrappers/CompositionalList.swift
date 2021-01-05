@@ -14,31 +14,28 @@ import SwiftUI
  - `V` must conform to `View`
  */
 
-
-// TODO:  fix this bug and assign an enum as sections!
-
-struct CompositionalList<H: View, V: View, Model: Hashable> {
+struct CompositionalList<HeaderFooterView: View,
+                         RowView: View,
+                         RowViewModel: Hashable> {
         
-    typealias Diff = DiffCollectionView<H, V, Model>
+    typealias Diff = DiffCollectionView<HeaderFooterView, RowView, RowViewModel>
     
-    let itemsPerSection: [[Model]]
+    let itemsPerSection: [[RowViewModel]]
     var parent: UIViewController?
     let cellProvider: Diff.CellProvider
     
     private (set)var layout: UICollectionViewLayout = UICollectionViewLayout()
-    private (set)var headerProvider: Diff.HeaderProvider? = nil
+    private (set)var headerProvider: Diff.HeaderFooterProvider? = nil
     
-    init(_ itemsPerSection: [[Model]],
+    init(_ itemsPerSection: [[RowViewModel]],
          parent: UIViewController? = nil,
-         cellProvider: @escaping Diff.CellProvider,
-         headerProvider: @escaping  Diff.HeaderProvider) {
+         cellProvider: @escaping Diff.CellProvider) {
         
         self.itemsPerSection = itemsPerSection
         self.parent = parent
         self.cellProvider = cellProvider
-        self.headerProvider = headerProvider
     }
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -46,12 +43,12 @@ struct CompositionalList<H: View, V: View, Model: Hashable> {
     class Coordinator: NSObject {
         
         fileprivate let list: CompositionalList
-        fileprivate let itemsPerSection: [[Model]]
+        fileprivate let itemsPerSection: [[RowViewModel]]
         fileprivate let cellProvider: Diff.CellProvider
         fileprivate var parent: UIViewController?
         
         fileprivate let layout: UICollectionViewLayout
-        fileprivate let headerProvider: Diff.HeaderProvider?
+        fileprivate let headerProvider: Diff.HeaderFooterProvider?
         
         init(_ list: CompositionalList) {
             
@@ -72,8 +69,6 @@ extension CompositionalList: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> Diff {
-        
-        
         Diff(layout: context.coordinator.layout,
              parent: context.coordinator.parent,
              context.coordinator.cellProvider,
@@ -88,10 +83,10 @@ extension CompositionalList {
         `self`.layout = layout()
         return `self`
     }
-//
-//    func header(_ header: @escaping Diff.HeaderProvider) -> Self {
-//        var `self` = self
-//        `self`.headerProvider = header
-//        return `self`
-//    }
+
+    func header(_ header: @escaping Diff.HeaderFooterProvider) -> Self {
+        var `self` = self
+        `self`.headerProvider = header
+        return `self`
+    }
 }
