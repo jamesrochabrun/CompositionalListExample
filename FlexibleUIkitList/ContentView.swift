@@ -33,10 +33,14 @@ struct ContentView: View {
                 let sectOne = MovieSectionItem(sectionIdentifier: .main, cellIdentifiers: section0)
                 let sectTwo = MovieSectionItem(sectionIdentifier: .more, cellIdentifiers: section1)
                 
+                let debugLayout = MovieSectionItem(sectionIdentifier: .main, cellIdentifiers: viewModel.movies)
+                
                 CompositionalList([sectOne, sectTwo]) { model, indexPath in
                     Group {
                         switch indexPath.section {
                         case 0:
+                           // MovieArtWork(movie: model)
+                        
                             MoviePageView(movie: model)
                         default:
                             NavigationLink(
@@ -47,19 +51,34 @@ struct ContentView: View {
                     }
                 }
                 .layout {
-                    UICollectionViewCompositionalLayout.homeLayout()
+                                        
+                    return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment  in
+                        if sectionIndex == 1 {
+                            return .layoutWithDimension(dimension: LayoutDimension(width: 100)) /// <- improve this!
+                        } else {
+                            return .listWith(scrollingBehavior: .paging, header: true, footer: true)
+                        }
+                    }
                 }
                 .sectionHeader { sectionIdentifier, kind, indexPath  in
-                    VStack {
-                        Text("sectionIdentifier.models")
-                        ScrollView (.horizontal, showsIndicators: false) {
-                             HStack {
-                                 //contents
-                                ForEach(sectionIdentifier.models, id: \.self) { title in
-                                    Text(title)
-                                }
-                             }
-                        }.frame(height: 100)
+                    Group {
+                        switch kind {
+                        case UICollectionView.elementKindSectionFooter:
+                            Text("yeah foot")
+                        default:
+                            VStack {
+                                Text("Main title")
+                                ScrollView (.horizontal, showsIndicators: false) {
+                                     HStack {
+                                         //contents
+                                        ForEach(sectionIdentifier.models, id: \.self) { title in
+                                            /// Replace with a nice set of pills.
+                                            Text(title)
+                                        }
+                                     }
+                                }.frame(height: 100)
+                            }
+                        }
                     }
                 }
                 .navigationBarTitle("Movies")
@@ -70,6 +89,9 @@ struct ContentView: View {
             viewModel.load()
         }
     }
+    
+    /// Build the appstore stuff!!!
+    /// if possible avoid the need of return a header with the spacer hack
 }
 
 struct MovieSectionItem: SectionIdentifierViewModel {
@@ -89,6 +111,17 @@ enum Section: String {
     }
 }
 
+
+//extension View {
+//   @ViewBuilder
+//   func `if`<Content: View>(_ conditional: Bool, content: (Self) -> Content) -> some View {
+//        if conditional {
+//            content(self)
+//        } else {
+//            self
+//        }
+//    }
+//}
 
 // MARK: - UI
 struct MovieDetail: View {

@@ -13,7 +13,6 @@ import SwiftUI
  - `Model` must conform to `Hashable` so it can be used inside a `DiffableDataSource`
  - `V` must conform to `View`
  */
-
 struct CompositionalList<ViewModel: SectionIdentifierViewModel,
                          RowView: View,
                          HeaderFooterView: View> {
@@ -83,7 +82,7 @@ extension CompositionalList {
         `self`.layout = layout()
         return `self`
     }
-
+    
     func sectionHeader(_ header: @escaping Diff.HeaderFooterProvider) -> Self {
         var `self` = self
         `self`.headerProvider = header

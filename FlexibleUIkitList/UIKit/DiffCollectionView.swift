@@ -46,7 +46,7 @@ final class DiffCollectionView<ViewModel: SectionIdentifierViewModel,
     convenience init(layout: UICollectionViewLayout,
                      parent: UIViewController?,
                      _ cellProvider: @escaping CellProvider,
-                     _ headerProvider: HeaderFooterProvider?) {
+                     _ headerFooterProvider: HeaderFooterProvider?) {
         self.init()
         collectionView = .init(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
@@ -58,8 +58,8 @@ final class DiffCollectionView<ViewModel: SectionIdentifierViewModel,
         collectionView.fillSuperview()
         collectionView.collectionViewLayout = layout
         configureDataSource(cellProvider)
-        if let headerProvider = headerProvider {
-            header(headerProvider)
+        if let headerFooterProvider = headerFooterProvider {
+            assignHedearFooter(headerFooterProvider)
         }
         self.parent = parent
     }
@@ -104,12 +104,12 @@ extension NSDiffableDataSourceSnapshot {
 
 extension DiffCollectionView {
     
-    func header(_ headerProvider: @escaping HeaderFooterProvider) {
+    func assignHedearFooter(_ headerFooterProvider: @escaping HeaderFooterProvider) {
         
         dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
             let header: WrapperCollectionReusableView<HeaderFooterView> = collectionView.dequeueSuplementaryView(of: kind, at: indexPath)
             if let sectionIdentifier = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section] {
-                header.setupWith(headerProvider(sectionIdentifier, kind, indexPath)!, parent: self.parent)
+                header.setupWith(headerFooterProvider(sectionIdentifier, kind, indexPath)!, parent: self.parent)
             }
             return header
         }
