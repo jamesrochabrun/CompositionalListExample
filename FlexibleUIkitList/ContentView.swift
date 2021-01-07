@@ -14,6 +14,16 @@ struct ContentView: View {
     
     let titleSections = ["Recent movies", "New Releases"]
 
+    private var layout: UICollectionViewLayout {
+        UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment  in
+           if sectionIndex == 1 {
+               return .layoutWithDimension(dimension: LayoutDimension(width: 100)) /// <- improve this!
+           } else {
+            return layoutEnvironment.isPortraitEnvironment ? .grid(3) : .listWith(scrollingBehavior: .paging, header: true, footer: true)
+           }
+       }
+    }
+    
     var body: some View {
         NavigationView {
             if viewModel.movies.count  == 0 {
@@ -39,24 +49,12 @@ struct ContentView: View {
                     Group {
                         switch indexPath.section {
                         case 0:
-                           // MovieArtWork(movie: model)
-                        
                             MoviePageView(movie: model)
                         default:
                             NavigationLink(
                                 destination: MovieDetail(movie: model), label: {
                                     MovieArtWork(movie: model)
                                 })
-                        }
-                    }
-                }
-                .layout {
-                                        
-                    return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment  in
-                        if sectionIndex == 1 {
-                            return .layoutWithDimension(dimension: LayoutDimension(width: 100)) /// <- improve this!
-                        } else {
-                            return .listWith(scrollingBehavior: .paging, header: true, footer: true)
                         }
                     }
                 }
@@ -81,6 +79,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .customLayout(layout)
                 .navigationBarTitle("Movies")
                 .edgesIgnoringSafeArea(.vertical)
             }

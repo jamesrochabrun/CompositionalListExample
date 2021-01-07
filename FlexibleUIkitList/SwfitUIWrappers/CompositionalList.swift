@@ -18,12 +18,13 @@ struct CompositionalList<ViewModel: SectionIdentifierViewModel,
                          HeaderFooterView: View> {
         
     typealias Diff = DiffCollectionView<ViewModel, RowView, HeaderFooterView>
-    
+
+    @Environment(\.layout) var customLayout
+
     let itemsPerSection: [ViewModel]
     var parent: UIViewController?
     let cellProvider: Diff.CellProvider
     
-    private (set)var layout: UICollectionViewLayout = UICollectionViewLayout()
     private (set)var headerProvider: Diff.HeaderFooterProvider? = nil
     
     init(_ itemsPerSection: [ViewModel],
@@ -40,7 +41,7 @@ struct CompositionalList<ViewModel: SectionIdentifierViewModel,
     }
     
     class Coordinator: NSObject {
-        
+    
         fileprivate let list: CompositionalList
         fileprivate let itemsPerSection: [ViewModel]
         fileprivate let cellProvider: Diff.CellProvider
@@ -53,7 +54,7 @@ struct CompositionalList<ViewModel: SectionIdentifierViewModel,
             
             self.list = list
             self.itemsPerSection = list.itemsPerSection
-            self.layout = list.layout
+            self.layout = list.customLayout
             self.cellProvider = list.cellProvider
             self.parent = list.parent
             self.headerProvider = list.headerProvider
@@ -77,12 +78,6 @@ extension CompositionalList: UIViewRepresentable {
 
 extension CompositionalList {
     
-    func layout(_ layout: () -> UICollectionViewLayout) -> Self {
-        var `self` = self
-        `self`.layout = layout()
-        return `self`
-    }
-    
     func sectionHeader(_ header: @escaping Diff.HeaderFooterProvider) -> Self {
         var `self` = self
         `self`.headerProvider = header
@@ -90,3 +85,22 @@ extension CompositionalList {
     }
 }
 
+/// Environment
+fileprivate struct Layout: EnvironmentKey {
+    static var defaultValue: UICollectionViewLayout = UICollectionViewLayout()
+}
+
+/// step 2 extend `EnvironmentValues` using `EnvironmentKey` conformer
+extension EnvironmentValues {
+    var layout: UICollectionViewLayout {
+        get { self[Layout.self] }
+        set { self[Layout.self] = newValue }
+    }
+}
+
+/// step 3 creat an extension in `View` this is because we need ot be able to add it at any subtree view
+extension CompositionalList {
+    func customLayout(_ layout: UICollectionViewLayout) -> some View {
+        environment(\.layout, layout)
+    }
+}
